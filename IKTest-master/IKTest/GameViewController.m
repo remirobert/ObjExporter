@@ -33,6 +33,10 @@
 {
     [super viewDidLoad];
 
+    SCNMatrix4 identity = SCNMatrix4Identity;
+
+    [self displayMatrix:identity];
+    
     scene = [SCNScene sceneNamed:@"TestArm.dae"];//[SCNScene sceneNamed:@"stone.dae"];
     
 //    SCNScene *sc = [SCNScene sceneNamed:@"tigTest2.dae"];
@@ -179,7 +183,7 @@
 }
 
 - (void)loop:(SCNNode *)node {
-    NSLog(@"%@ : [%f %f %f][%f %f %f][%f %f %f][%f %f %f]", node.name, node.worldTransform.m11, node.worldTransform.m12, node.worldTransform.m13, node.worldTransform.m21, node.worldTransform.m22, node.worldTransform.m23, node.worldTransform.m31, node.worldTransform.m32, node.worldTransform.m33, node.worldTransform.m41, node.worldTransform.m42, node.worldTransform.m43);
+    NSLog(@"%@ : [%f %f %f %f][%f %f %f %f][%f %f %f %f][%f %f %f %f]", node.name, node.transform.m11, node.transform.m12, node.transform.m13, node.transform.m14, node.transform.m21, node.transform.m22, node.transform.m23, node.transform.m24, node.transform.m31, node.transform.m32, node.transform.m33, node.transform.m34, node.transform.m41, node.transform.m42, node.transform.m43, node.transform.m44);
 
     for (SCNNode *n in node.childNodes) {
         [self loop:n];

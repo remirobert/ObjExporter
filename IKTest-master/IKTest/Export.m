@@ -354,17 +354,17 @@ static Primitive *newPrimitive(float x, float y, float z) {
         if (point.node2) {
             
             
-            newMatrix.m11 = (point.node1.worldTransform.m11 * point.weight1) + (point.node2.worldTransform.m11 * point.weight2);
-            newMatrix.m12 = (point.node1.worldTransform.m12 * point.weight1) + (point.node2.worldTransform.m12 * point.weight2);
-            newMatrix.m13 = (point.node1.worldTransform.m13 * point.weight1) + (point.node2.worldTransform.m13 * point.weight2);
-
-            newMatrix.m21 = (point.node1.worldTransform.m21 * point.weight1) + (point.node2.worldTransform.m21 * point.weight2);
-            newMatrix.m22 = (point.node1.worldTransform.m22 * point.weight1) + (point.node2.worldTransform.m22 * point.weight2);
-            newMatrix.m23 = (point.node1.worldTransform.m23 * point.weight1) + (point.node2.worldTransform.m23 * point.weight2);
-
-            newMatrix.m31 = (point.node1.worldTransform.m31 * point.weight1) + (point.node2.worldTransform.m31 * point.weight2);
-            newMatrix.m32 = (point.node1.worldTransform.m32 * point.weight1) + (point.node2.worldTransform.m32 * point.weight2);
-            newMatrix.m33 = (point.node1.worldTransform.m33 * point.weight1) + (point.node2.worldTransform.m33 * point.weight2);
+//            newMatrix.m11 = (point.node1.worldTransform.m11 * point.weight1) + (point.node2.worldTransform.m11 * point.weight2);
+//            newMatrix.m12 = (point.node1.worldTransform.m12 * point.weight1) + (point.node2.worldTransform.m12 * point.weight2);
+//            newMatrix.m13 = (point.node1.worldTransform.m13 * point.weight1) + (point.node2.worldTransform.m13 * point.weight2);
+//
+//            newMatrix.m21 = (point.node1.worldTransform.m21 * point.weight1) + (point.node2.worldTransform.m21 * point.weight2);
+//            newMatrix.m22 = (point.node1.worldTransform.m22 * point.weight1) + (point.node2.worldTransform.m22 * point.weight2);
+//            newMatrix.m23 = (point.node1.worldTransform.m23 * point.weight1) + (point.node2.worldTransform.m23 * point.weight2);
+//
+//            newMatrix.m31 = (point.node1.worldTransform.m31 * point.weight1) + (point.node2.worldTransform.m31 * point.weight2);
+//            newMatrix.m32 = (point.node1.worldTransform.m32 * point.weight1) + (point.node2.worldTransform.m32 * point.weight2);
+//            newMatrix.m33 = (point.node1.worldTransform.m33 * point.weight1) + (point.node2.worldTransform.m33 * point.weight2);
             
             
 //            newMatrix.m11 = (point.node1.worldTransform.m11 + point.node2.worldTransform.m11) / 2;
@@ -385,6 +385,7 @@ static Primitive *newPrimitive(float x, float y, float z) {
 //
         }
         
+        
         NSLog(@"%@ : [%f %f %f][%f %f %f][%f %f %f][%f %f %f]", point.node1.name, newMatrix.m11, newMatrix.m12, newMatrix.m13, newMatrix.m21, newMatrix.m22, newMatrix.m23, newMatrix.m31, newMatrix.m32, newMatrix.m33, newMatrix.m41, newMatrix.m42, newMatrix.m43);
         
         Vertex *new = [Vertex new];
@@ -399,7 +400,34 @@ static Primitive *newPrimitive(float x, float y, float z) {
         new.y = new.y / w;
         new.z = new.z / w;
         
-        [content appendFormat:@"v %f %f %f\n", new.x, new.y, new.z];
+        
+        if (point.node2) {
+            Vertex *new2 = [Vertex new];
+            newMatrix = point.node2.worldTransform;
+            
+            new2.x = (newMatrix.m11 * currentVertex.x) + (newMatrix.m21 * currentVertex.y) + (newMatrix.m31 * currentVertex.z) + newMatrix.m41;
+            new2.y = (newMatrix.m12 * currentVertex.x) + (newMatrix.m22 * currentVertex.y) + (newMatrix.m32 * currentVertex.z) + newMatrix.m42;
+            new2.z = (newMatrix.m13 * currentVertex.x) + (newMatrix.m23 * currentVertex.y) + (newMatrix.m33 * currentVertex.z) + newMatrix.m43;
+            
+            float w = (newMatrix.m14 * currentVertex.x) + (newMatrix.m24 * currentVertex.y) + (newMatrix.m34 * currentVertex.z) + newMatrix.m44;
+            
+            new2.x = new2.x / w;
+            new2.y = new2.y / w;
+            new2.z = new2.z / w;
+            
+            
+            Vertex *final = [Vertex new];
+            
+            final.x = ((new.x * point.weight1) + (new2.x * point.weight2)) / (point.weight1 + point.weight2);
+            final.y = ((new.y * point.weight1) + (new2.y * point.weight2)) / (point.weight1 + point.weight2);
+            final.z = ((new.z * point.weight1) + (new2.z * point.weight2)) / (point.weight1 + point.weight2);
+            
+            [content appendFormat:@"v %f %f %f\n", final.x, final.y, final.z];
+        }
+        else {
+            [content appendFormat:@"v %f %f %f\n", new.x, new.y, new.z];
+        }
+        
         indexNode += 1;
     }
     [content appendFormat:@"\n"];
